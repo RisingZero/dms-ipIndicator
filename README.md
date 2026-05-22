@@ -43,10 +43,11 @@ git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShe
 
 GPL-3.0
 
-## Roadmap / TODO
+## Done
 
-- [ ] **Smart VPN Detection**: Automatically detect active VPN/Proxy connections by monitoring network interfaces (e.g., `tun0`, `wg0`) and display a status badge.
-- [ ] **Latency Monitor**: Integrated ping tool to measure real-time latency to common DNS servers (e.g., 8.8.8.8, 1.1.1.1).
-- [ ] **Local IP Details**: Add a section in the popout for local network information (Local IP, Gateway, Interface name).
-- [ ] **Service Redundancy**: Implement failover support for multiple IP geolocation providers (e.g., ipinfo.io, ifconfig.me) to improve reliability.
-- [ ] **IP Change Notifications**: Optional desktop notifications when your public IP address or ISP changes.
+- [x] Smart VPN Detection
+- [x] Latency Monitor
+- [x] Local IP Details
+- [x] Service Redundancy
+- [x] IP Change Notifications
+
