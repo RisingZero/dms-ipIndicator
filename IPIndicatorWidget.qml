@@ -45,12 +45,13 @@ PluginComponent {
 
     // IP change tracking
     property string lastKnownIP: ""
+    property string lastKnownISP: ""
 
-    // Provider list for redundancy
+    // Provider list for redundancy (primary uses HTTPS for privacy/security)
     property var ipProviders: [
         {
             name: "ip-api.com",
-            url: "http://ip-api.com/json",
+            url: "https://ip-api.com/json",
             parser: function(data) {
                 return {
                     ip: data.query || "",
@@ -103,21 +104,45 @@ PluginComponent {
         }
     }
 
+    // Shell command helpers — thin wrappers around Proc.runCommand
+    // for commonly used shell pipelines. Keeps the main logic readable
+    // and avoids dense sh -c invocations scattered through the code.
+    function _runSh(taskId, script, callback) {
+        Proc.runCommand(taskId, ["sh", "-c", script], callback, 3000)
+    }
+
+    function _findVpnInterface() {
+        _runSh("check-vpn", "ls /sys/class/net | grep -E '^(tun|tap|wg|ppp)' | head -1", function(output, exitCode) {
+            if (exitCode === 0 && output.trim() !== "") {
+                vpnActive = true
+                vpnInterfaceName = output.trim()
+            } else {
+                vpnActive = false
+                vpnInterfaceName = ""
+            }
+        })
+    }
+
+    function _fetchLocalInterface() {
+        _runSh("local-iface", "ip route get 1.1.1.1 | awk '/dev/ {for(i=1;i<=NF;i++) if($i==\"dev\") print $(i+1); exit}'", function(output, exitCode) {
+            localInterface = (exitCode === 0 && output.trim() !== "") ? output.trim() : "N/A"
+        })
+    }
+
+    function _fetchLocalGateway() {
+        _runSh("local-gw", "ip route | awk '/default/ {print $3; exit}'", function(output, exitCode) {
+            localGateway = (exitCode === 0 && output.trim() !== "") ? output.trim() : "N/A"
+        })
+    }
+
+    function _fetchLocalIP() {
+        _runSh("local-ip-addr", "hostname -I | awk '{print $1}'", function(output, exitCode) {
+            localIP = (exitCode === 0 && output.trim() !== "") ? output.trim() : "N/A"
+        })
+    }
+
     function checkVPN() {
-        Proc.runCommand(
-            "check-vpn",
-            ["sh", "-c", "ls /sys/class/net | grep -E '^(tun|tap|wg|ppp)' | head -1"],
-            function(output, exitCode) {
-                if (exitCode === 0 && output.trim() !== "") {
-                    vpnActive = true
-                    vpnInterfaceName = output.trim()
-                } else {
-                    vpnActive = false
-                    vpnInterfaceName = ""
-                }
-            },
-            3000
-        )
+        _findVpnInterface()
     }
 
     function measureLatency(target) {
@@ -144,42 +169,9 @@ PluginComponent {
     }
 
     function fetchLocalDetails() {
-        Proc.runCommand(
-            "local-iface",
-            ["sh", "-c", "ip route get 1.1.1.1 | awk '/dev/ {for(i=1;i<=NF;i++) if($i==\"dev\") print $(i+1); exit}'"],
-            function(output, exitCode) {
-                if (exitCode === 0 && output.trim() !== "") {
-                    localInterface = output.trim()
-                } else {
-                    localInterface = "N/A"
-                }
-            },
-            3000
-        )
-        Proc.runCommand(
-            "local-gw",
-            ["sh", "-c", "ip route | awk '/default/ {print $3; exit}'"],
-            function(output, exitCode) {
-                if (exitCode === 0 && output.trim() !== "") {
-                    localGateway = output.trim()
-                } else {
-                    localGateway = "N/A"
-                }
-            },
-            3000
-        )
-        Proc.runCommand(
-            "local-ip-addr",
-            ["sh", "-c", "hostname -I | awk '{print $1}'"],
-            function(output, exitCode) {
-                if (exitCode === 0 && output.trim() !== "") {
-                    localIP = output.trim()
-                } else {
-                    localIP = "N/A"
-                }
-            },
-            3000
-        )
+        _fetchLocalInterface()
+        _fetchLocalGateway()
+        _fetchLocalIP()
     }
 
     function fetchIPInfo() {
@@ -213,16 +205,23 @@ PluginComponent {
                     regionName = parsed.region || ""
                     cityName = parsed.city || ""
 
-                    if (lastKnownIP && lastKnownIP !== "" && publicIP !== lastKnownIP) {
-                        if (notifyOnIPChange) {
-                            Proc.runCommand(
-                                "notify-ip-change",
-                                ["notify-send", "IP Indicator", "IP changed from " + lastKnownIP + " to " + publicIP + (ispName ? " (" + ispName + ")" : "")],
-                                function() {},
-                                5000
-                            )
+                    var ipChanged = lastKnownIP !== "" && publicIP !== lastKnownIP
+                    var ispChanged = lastKnownISP !== "" && ispName !== "" && ispName !== lastKnownISP
+
+                    if (notifyOnIPChange && (ipChanged || ispChanged)) {
+                        var reason = ""
+                        if (ipChanged && ispChanged) {
+                            reason = "IP changed from " + lastKnownIP + " to " + publicIP + " | ISP: " + lastKnownISP + " → " + ispName
+                        } else if (ipChanged) {
+                            reason = "IP changed from " + lastKnownIP + " to " + publicIP + (ispName ? " (" + ispName + ")" : "")
+                        } else {
+                            reason = "ISP changed: " + lastKnownISP + " → " + ispName + " (IP: " + publicIP + ")"
                         }
+                        Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 5000)
                     }
+
+                    lastKnownIP = publicIP
+                    lastKnownISP = ispName
 
                     statusMessage = "OK"
                 } catch (e) {

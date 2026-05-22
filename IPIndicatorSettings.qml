@@ -72,8 +72,8 @@ PluginSettings {
 
         ToggleSetting {
             settingKey: "notifyOnIPChange"
-            label: "IP Change Notifications"
-            description: "Show a desktop notification when your public IP or ISP changes."
+            label: "IP / ISP Change Notifications"
+            description: "Show a desktop notification when your public IP address or ISP changes."
             defaultValue: false
         }
 
