@@ -26,7 +26,6 @@ git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShe
 
 - **IP info at a glance** - Country flag, IP address, and ISP details
 - **Privacy mode** - Click the eye button in popout header to toggle IP visibility
-- **Quick Refresh** - Right-click the bar icon to instantly update connection status
 - **Smart VPN Detection** - Automatically detects active VPN/proxy interfaces
 - **Latency & Local Details** - Real-time latency monitor and local IP network details
 
@@ -45,11 +44,3 @@ git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShe
 ## License
 
 GPL-3.0
-
-## Done
-
-- [x] Smart VPN Detection
-- [x] Latency Monitor
-- [x] Local IP Details
-- [x] Service Redundancy
-- [x] IP Change Notifications
