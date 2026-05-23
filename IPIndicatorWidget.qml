@@ -238,7 +238,21 @@ PluginComponent {
                     var ipChanged = lastKnownIP !== "" && publicIP !== lastKnownIP
 
                     if (notifyOnIPChange && ipChanged) {
-                        var reason = "IP changed: " + lastKnownIP + " → " + publicIP + (ispName ? " (" + ispName + ")" : "")
+                        var lines = [
+                            "Old IP: " + lastKnownIP,
+                            "New IP: " + publicIP
+                        ]
+                        if (ispName) {
+                            lines.push("ISP: " + ispName)
+                        }
+                        var locs = []
+                        if (cityName) locs.push(cityName)
+                        if (regionName) locs.push(regionName)
+                        if (countryName) locs.push(countryName)
+                        if (locs.length > 0) {
+                            lines.push("Location: " + locs.join(", "))
+                        }
+                        var reason = lines.join("\n")
                         Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 50, 5000)
                     }
 
