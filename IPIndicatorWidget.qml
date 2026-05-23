@@ -108,7 +108,7 @@ PluginComponent {
     // for commonly used shell pipelines. Keeps the main logic readable
     // and avoids dense sh -c invocations scattered through the code.
     function _runSh(taskId, script, callback) {
-        Proc.runCommand(taskId, ["sh", "-c", script], callback, 3000)
+        Proc.runCommand(taskId, ["sh", "-c", script], callback, 50, 3000)
     }
 
     function _findVpnInterface() {
@@ -164,6 +164,7 @@ PluginComponent {
                     latencyError = "N/A"
                 }
             },
+            50,
             5000
         )
     }
@@ -217,7 +218,7 @@ PluginComponent {
                         } else {
                             reason = "ISP changed: " + lastKnownISP + " → " + ispName + " (IP: " + publicIP + ")"
                         }
-                        Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 5000)
+                        Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 50, 5000)
                     }
 
                     lastKnownIP = publicIP
@@ -228,6 +229,7 @@ PluginComponent {
                     tryProvider(index + 1)
                 }
             },
+            50,
             30000
         )
     }
