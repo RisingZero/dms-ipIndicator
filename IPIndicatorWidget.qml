@@ -238,21 +238,26 @@ PluginComponent {
                     var ipChanged = lastKnownIP !== "" && publicIP !== lastKnownIP
 
                     if (notifyOnIPChange && ipChanged) {
-                        var lines = [
-                            "Old IP: " + lastKnownIP,
-                            "New IP: " + publicIP
-                        ]
-                        if (ispName) {
-                            lines.push("ISP: " + ispName)
+                        var reason = ""
+                        if (privacyMode) {
+                            reason = "Network connection changed (IP details hidden in Privacy Mode)"
+                        } else {
+                            var lines = [
+                                "Old IP: " + lastKnownIP,
+                                "New IP: " + publicIP
+                            ]
+                            if (ispName) {
+                                lines.push("ISP: " + ispName)
+                            }
+                            var locs = []
+                            if (cityName) locs.push(cityName)
+                            if (regionName) locs.push(regionName)
+                            if (countryName) locs.push(countryName)
+                            if (locs.length > 0) {
+                                lines.push("Location: " + locs.join(", "))
+                            }
+                            reason = lines.join("\n")
                         }
-                        var locs = []
-                        if (cityName) locs.push(cityName)
-                        if (regionName) locs.push(regionName)
-                        if (countryName) locs.push(countryName)
-                        if (locs.length > 0) {
-                            lines.push("Location: " + locs.join(", "))
-                        }
-                        var reason = lines.join("\n")
                         Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 50, 5000)
                     }
 
