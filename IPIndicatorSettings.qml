@@ -71,6 +71,20 @@ PluginSettings {
         }
 
         ToggleSetting {
+            settingKey: "notifyOnIPChange"
+            label: "IP / ISP Change Notifications"
+            description: "Show a desktop notification when your public IP address or ISP changes."
+            defaultValue: false
+        }
+
+        ToggleSetting {
+            settingKey: "privacyDefault"
+            label: "Default to Privacy Mode"
+            description: "Start the plugin with public IP details hidden by default."
+            defaultValue: false
+        }
+
+        ToggleSetting {
             settingKey: "showHints"
             label: "Show Hints"
             description: "Display helpful usage tips and shortcuts at the bottom of the popout."
