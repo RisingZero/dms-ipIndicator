@@ -29,6 +29,16 @@ PluginComponent {
     readonly property bool showLocation: (pluginData.showLocation ?? true)
     readonly property string displayMode: (pluginData.displayMode || "country")
     readonly property bool notifyOnIPChange: (pluginData.notifyOnIPChange ?? false)
+    readonly property int refreshIntervalMin: (pluginData.refreshInterval ?? 30)
+
+    onRefreshIntervalMinChanged: {
+        if (bgRefreshTimer.running) {
+            bgRefreshTimer.restart()
+        }
+    }
+
+    // Fetching state
+    property bool isFetching: false
 
     // VPN Detection
     property bool vpnActive: false
@@ -45,13 +55,12 @@ PluginComponent {
 
     // IP change tracking
     property string lastKnownIP: ""
-    property string lastKnownISP: ""
 
     // Provider list for redundancy (primary uses HTTPS for privacy/security)
     property var ipProviders: [
         {
             name: "ip-api.com",
-            url: "https://ip-api.com/json",
+            url: "http://ip-api.com/json",
             parser: function(data) {
                 return {
                     ip: data.query || "",
@@ -97,10 +106,23 @@ PluginComponent {
         checkVPN()
         fetchLocalDetails()
         if (autoRefresh) {
-            statusMessage = "Loading..."
+            statusMessage = "..."
             fetchIPInfo()
         } else {
             statusMessage = "Click to fetch"
+        }
+    }
+
+    Timer {
+        id: bgRefreshTimer
+        interval: refreshIntervalMin * 60 * 1000 // Convert minutes to milliseconds
+        running: autoRefresh
+        repeat: true
+        triggeredOnStart: false
+        onTriggered: {
+            checkVPN()
+            fetchLocalDetails()
+            fetchIPInfo()
         }
     }
 
@@ -177,12 +199,14 @@ PluginComponent {
 
     function fetchIPInfo() {
         lastKnownIP = publicIP
-        statusMessage = "Fetching..."
+        isFetching = true
+        statusMessage = "..."
         tryProvider(0)
     }
 
     function tryProvider(index) {
         if (index >= ipProviders.length) {
+            isFetching = false
             statusMessage = "Error"
             return
         }
@@ -199,6 +223,11 @@ PluginComponent {
                     var data = JSON.parse(output)
                     var parsed = provider.parser(data)
 
+                    if (!parsed || !parsed.ip) {
+                        tryProvider(index + 1)
+                        return
+                    }
+
                     publicIP = parsed.ip || ""
                     ispName = parsed.isp || ""
                     countryCode = parsed.countryCode || ""
@@ -207,23 +236,15 @@ PluginComponent {
                     cityName = parsed.city || ""
 
                     var ipChanged = lastKnownIP !== "" && publicIP !== lastKnownIP
-                    var ispChanged = lastKnownISP !== "" && ispName !== "" && ispName !== lastKnownISP
 
-                    if (notifyOnIPChange && (ipChanged || ispChanged)) {
-                        var reason = ""
-                        if (ipChanged && ispChanged) {
-                            reason = "IP changed from " + lastKnownIP + " to " + publicIP + " | ISP: " + lastKnownISP + " → " + ispName
-                        } else if (ipChanged) {
-                            reason = "IP changed from " + lastKnownIP + " to " + publicIP + (ispName ? " (" + ispName + ")" : "")
-                        } else {
-                            reason = "ISP changed: " + lastKnownISP + " → " + ispName + " (IP: " + publicIP + ")"
-                        }
+                    if (notifyOnIPChange && ipChanged) {
+                        var reason = "IP changed: " + lastKnownIP + " → " + publicIP + (ispName ? " (" + ispName + ")" : "")
                         Proc.runCommand("notify-ip-change", ["notify-send", "IP Indicator", reason], function() {}, 50, 5000)
                     }
 
                     lastKnownIP = publicIP
-                    lastKnownISP = ispName
 
+                    isFetching = false
                     statusMessage = "OK"
                 } catch (e) {
                     tryProvider(index + 1)
@@ -240,7 +261,8 @@ PluginComponent {
 
     function getDisplayText() {
         if (root.displayMode === "icon") return ""
-        if (privacyMode) return "Hidden"
+        if (privacyMode) return ""
+        if (isFetching) return "..."
         if (root.publicIP) {
             switch (root.displayMode) {
                 case "ip": return root.publicIP;
@@ -258,13 +280,18 @@ PluginComponent {
     }
 
     readonly property color pillColor: {
+        if (isFetching) return Theme.surfaceText
         if (privacyMode) return Theme.warning
         if (vpnActive) return Theme.success
         if (root.publicIP) return Theme.primary
         return Theme.surfaceText
     }
 
-    pillRightClickAction: () => { togglePrivacy() }
+    pillRightClickAction: () => {
+        checkVPN()
+        fetchLocalDetails()
+        fetchIPInfo()
+    }
 
     horizontalBarPill: Component {
         Row {
@@ -282,7 +309,7 @@ PluginComponent {
                 color: root.pillColor
                 font.pixelSize: Theme.fontSizeMedium
                 anchors.verticalCenter: parent.verticalCenter
-                visible: root.displayMode !== "icon"
+                visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
             }
         }
     }
@@ -303,7 +330,7 @@ PluginComponent {
                 color: root.pillColor
                 font.pixelSize: Theme.fontSizeSmall
                 anchors.horizontalCenter: parent.horizontalCenter
-                visible: root.displayMode !== "icon"
+                visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
             }
         }
     }
@@ -313,6 +340,10 @@ PluginComponent {
             width: parent ? parent.width : 0
             implicitHeight: mainContent.implicitHeight
 
+            Component.onCompleted: {
+                measureLatency("8.8.8.8")
+            }
+
             PopoutComponent {
                 id: mainContent
                 width: parent.width
@@ -320,35 +351,68 @@ PluginComponent {
                 detailsText: privacyMode ? "Hidden" : root.statusMessage
                 showCloseButton: false
 
-                Column {
-                    width: parent.width
-                    spacing: Theme.spacingM
-
-                    // Buttons
+                headerActions: Component {
                     Row {
                         spacing: Theme.spacingS
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
 
-                        DankButton {
-                            text: privacyMode ? "Show" : "Hide"
-                            iconName: privacyMode ? "visibility" : "visibility_off"
-                            backgroundColor: Theme.warning
-                            textColor: Theme.onSurface
-                            onClicked: togglePrivacy()
+                        // Privacy Button
+                        Rectangle {
+                            width: 32
+                            height: 32
+                            radius: 16
+                            color: privacyArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: privacyMode ? "visibility_off" : "visibility"
+                                size: Theme.iconSizeSmall
+                                color: Theme.surfaceText
+                            }
+
+                            MouseArea {
+                                id: privacyArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: togglePrivacy()
+                            }
                         }
 
-                        DankButton {
-                            text: "Refresh"
-                            iconName: "refresh"
-                            backgroundColor: Theme.primary
-                            textColor: Theme.onPrimary
-                            onClicked: {
-                                checkVPN()
-                                fetchLocalDetails()
-                                fetchIPInfo()
+                        // Refresh Button
+                        Rectangle {
+                            width: 32
+                            height: 32
+                            radius: 16
+                            color: refreshArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: "refresh"
+                                size: Theme.iconSizeSmall
+                                color: Theme.surfaceText
+                            }
+
+                            MouseArea {
+                                id: refreshArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    checkVPN()
+                                    fetchLocalDetails()
+                                    fetchIPInfo()
+                                }
                             }
                         }
                     }
+                }
+
+                Column {
+                    width: parent.width
+                    spacing: Theme.spacingM
 
                     // VPN badge
                     Row {
@@ -362,110 +426,226 @@ PluginComponent {
                         }
                     }
 
-                    // IP
-                    Column {
-                        spacing: Theme.spacingS
-                        visible: root.showIP
-
-                        StyledText {
-                            text: "IP"
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                        }
-
-                        StyledText {
-                            text: (privacyMode || !publicIP) ? "----" : publicIP
-                            font.pixelSize: Theme.fontSizeMedium
-                            color: Theme.surfaceText
-                        }
-                    }
-
-                    // ISP
-                    Column {
-                        spacing: Theme.spacingS
-                        visible: root.showISP
-
-                        StyledText {
-                            text: "ISP"
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                        }
-
-                        StyledText {
-                            text: privacyMode ? "----" : (ispName || "N/A")
-                            font.pixelSize: Theme.fontSizeMedium
-                            color: Theme.surfaceText
-                        }
-                    }
-
-                    // Location
-                    Column {
-                        spacing: Theme.spacingS
-                        visible: root.showLocation
-
-                        StyledText {
-                            text: "Location"
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                        }
-
-                        StyledText {
-                            text: privacyMode ? "----" : (countryName ? countryName + (cityName || regionName ? " - " + (cityName || regionName) : "") : "N/A")
-                            font.pixelSize: Theme.fontSizeMedium
-                            color: Theme.surfaceText
-                        }
-                    }
-
-                    // Local IP Details
-                    Column {
-                        spacing: Theme.spacingS
+                    // Group 1: Public Connection Card
+                    StyledRect {
                         width: parent.width
+                        height: visible ? (group1Column.implicitHeight + Theme.spacingM * 2) : 0
+                        color: Theme.surfaceContainerHigh
+                        radius: Theme.cornerRadius
+                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
+                        border.width: 1
+                        visible: root.showIP || root.showISP || root.showLocation
 
-                        StyledText {
-                            text: "Local Network"
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                        }
-                        Row {
-                            spacing: Theme.spacingS
-                            StyledText { text: "IP:"; color: Theme.surfaceText; font.pixelSize: Theme.fontSizeSmall }
-                            StyledText { text: localIP; color: Theme.surfaceVariantText; font.pixelSize: Theme.fontSizeSmall }
-                        }
-                        Row {
-                            spacing: Theme.spacingS
-                            StyledText { text: "Gateway:"; color: Theme.surfaceText; font.pixelSize: Theme.fontSizeSmall }
-                            StyledText { text: localGateway; color: Theme.surfaceVariantText; font.pixelSize: Theme.fontSizeSmall }
-                        }
-                        Row {
-                            spacing: Theme.spacingS
-                            StyledText { text: "Interface:"; color: Theme.surfaceText; font.pixelSize: Theme.fontSizeSmall }
-                            StyledText { text: localInterface; color: Theme.surfaceVariantText; font.pixelSize: Theme.fontSizeSmall }
-                        }
-                    }
+                        Column {
+                            id: group1Column
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: Theme.spacingM
+                            spacing: Theme.spacingM
 
-                    // Latency Monitor
-                    Column {
-                        spacing: Theme.spacingS
-                        width: parent.width
-
-                        StyledText {
-                            text: "Latency (8.8.8.8)"
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                        }
-                        Row {
-                            spacing: Theme.spacingS
-                            anchors.horizontalCenter: parent.horizontalCenter
                             StyledText {
-                                text: (latencyMs || latencyError || "Click Ping")
-                                color: (latencyError ? Theme.error : Theme.surfaceText)
-                                font.pixelSize: Theme.fontSizeMedium
-                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Public Connection"
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.bold: true
+                                color: Theme.primary
                             }
-                            DankButton {
-                                text: "Ping"
-                                iconName: "network_ping"
-                                onClicked: measureLatency("8.8.8.8")
+
+                            // IP Row
+                            Row {
+                                width: parent.width
+                                visible: root.showIP
+                                
+                                StyledText {
+                                    text: "Public IP"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                
+                                Row {
+                                    spacing: Theme.spacingS
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: !privacyMode && publicIP !== ""
+
+                                    StyledText {
+                                        text: publicIP
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        color: Theme.surfaceText
+                                        font.bold: true
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Rectangle {
+                                        width: 24
+                                        height: 24
+                                        radius: 12
+                                        color: copyArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
+                                        anchors.verticalCenter: parent.verticalCenter
+
+                                        DankIcon {
+                                            anchors.centerIn: parent
+                                            name: "content_copy"
+                                            size: Theme.iconSizeSmall - 2
+                                            color: Theme.primary
+                                        }
+
+                                        MouseArea {
+                                            id: copyArea
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                Proc.runCommand("copy-ip", ["wl-copy", "--", publicIP], function() {
+                                                    ToastService?.showInfo("Copied to clipboard")
+                                                })
+                                            }
+                                        }
+                                    }
+                                }
+
+                                StyledText {
+                                    text: "----"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                    visible: privacyMode || !publicIP
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            // ISP Row
+                            Row {
+                                width: parent.width
+                                visible: root.showISP
+                                
+                                StyledText {
+                                    text: "ISP"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: privacyMode ? "----" : (ispName || "N/A")
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            // Location Row
+                            Row {
+                                width: parent.width
+                                visible: root.showLocation
+                                
+                                StyledText {
+                                    text: "Location"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: privacyMode ? "----" : (countryName ? countryName + (cityName || regionName ? " - " + (cityName || regionName) : "") : "N/A")
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
+                    }
+
+                    // Group 2: Local Network Card
+                    StyledRect {
+                        width: parent.width
+                        height: group2Column.implicitHeight + Theme.spacingM * 2
+                        color: Theme.surfaceContainerHigh
+                        radius: Theme.cornerRadius
+                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
+                        border.width: 1
+
+                        Column {
+                            id: group2Column
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: Theme.spacingM
+                            spacing: Theme.spacingM
+
+                            StyledText {
+                                text: "Local Network"
+                                font.pixelSize: Theme.fontSizeSmall
+                                font.bold: true
+                                color: Theme.primary
+                            }
+
+                            // Local IP Row
+                            Row {
+                                width: parent.width
+                                
+                                StyledText {
+                                    text: "Local IP"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: localIP || "N/A"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                }
+                            }
+
+                            // Gateway Row
+                            Row {
+                                width: parent.width
+                                
+                                StyledText {
+                                    text: "Gateway"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: localGateway || "N/A"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                }
+                            }
+
+                            // Interface Row
+                            Row {
+                                width: parent.width
+                                
+                                StyledText {
+                                    text: "Interface"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: localInterface || "N/A"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                }
+                            }
+
+                            // Latency Row
+                            Row {
+                                width: parent.width
+                                
+                                StyledText {
+                                    text: "Latency"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceVariantText
+                                    width: 100
+                                }
+                                StyledText {
+                                    text: latencyMs ? latencyMs : (latencyError ? latencyError : "")
+                                    color: (latencyError ? Theme.error : Theme.surfaceText)
+                                    font.pixelSize: Theme.fontSizeMedium
+                                }
                             }
                         }
                     }
@@ -476,11 +656,11 @@ PluginComponent {
 
                         HintItem {
                             icon: "mouse"
-                            text: "Right-click the bar icon to quickly toggle Privacy Mode"
+                            text: "Right-click the bar icon to quickly refresh network status"
                         }
                         HintItem {
-                            icon: "refresh"
-                            text: "Click Refresh if your IP address or connection changes"
+                            icon: "visibility_off"
+                            text: "Use the eye button in header to toggle Privacy Mode"
                         }
                     }
                 }
@@ -488,14 +668,29 @@ PluginComponent {
         }
     }
 
-    popoutWidth: 260
+    popoutWidth: 330
     popoutHeight: {
-        let h = 180; // Header + Buttons + VPN badge
-        if (root.showIP) h += 50;
-        if (root.showISP) h += 50;
-        if (root.showLocation) h += 50;
+        let h = 80; // Header + spacing
+        
+        // Group 1: Public Connection Card
+        if (root.showIP || root.showISP || root.showLocation) {
+            h += 44; // Card Margins + Title
+            if (root.showIP) h += 28;
+            if (root.showISP) h += 28;
+            if (root.showLocation) h += 28;
+            let rows = 0;
+            if (root.showIP) rows++;
+            if (root.showISP) rows++;
+            if (root.showLocation) rows++;
+            if (rows > 1) h += 12 * (rows - 1);
+        }
+
+        // Group 2: Local Network Card
+        h += 44; // Card Margins + Title
+        h += 28 * 4; // Local IP, Gateway, Interface, Latency
+        h += 12 * 3; // 3 spacings
+
         if (root.showHints) h += 60;
-        h += 150; // Local Network + Latency
-        return h;
+        return h + 40; // margins
     }
 }

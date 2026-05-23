@@ -27,8 +27,8 @@ git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShe
 ## Features
 
 - **IP info at a glance** - Country flag, IP address, ISP
-- **Privacy mode** - Right-click to hide/show IP
-- **Auto-refresh** - Fetch on startup
+- **Privacy mode** - Click the eye button in popout header to hide/show IP
+- **Quick Refresh** - Right-click the bar icon to quickly refresh network status
 - **Smart VPN Detection** - Automatically detects active VPN/proxy interfaces (tun, tap, wg, ppp)
 - **Latency Monitor** - Integrated ping tool to measure real-time latency to DNS servers
 - **Local IP Details** - Local IP, gateway, and interface name in the popout
@@ -40,7 +40,7 @@ git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShe
 | Action | Result |
 |--------|--------|
 | Left click | Open details popout |
-| Right click | Toggle privacy mode |
+| Right click | Refresh network status |
 
 ## Requirements
 
