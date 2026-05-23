@@ -22,18 +22,14 @@ Or manually:
 git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShell/plugins/ipIndicator
 ```
 
-> **Note:** `dms-common` is a shared dependency required by this plugin. Install it first if you're cloning manually. The plugin manager handles this automatically.
-
 ## Features
 
-- **IP info at a glance** - Country flag, IP address, ISP
-- **Privacy mode** - Click the eye button in popout header to hide/show IP
-- **Quick Refresh** - Right-click the bar icon to quickly refresh network status
-- **Smart VPN Detection** - Automatically detects active VPN/proxy interfaces (tun, tap, wg, ppp)
-- **Latency Monitor** - Integrated ping tool to measure real-time latency to DNS servers
-- **Local IP Details** - Local IP, gateway, and interface name in the popout
-- **Service Redundancy** - Failover across 3 IP geolocation providers (ip-api.com, ipinfo.io, ifconfig.me)
-- **IP Change Notifications** - Optional desktop notifications when your IP or ISP changes
+- **IP info at a glance** - Country flag, IP address, and ISP details
+- **Privacy mode** - Click the eye button in popout header to toggle IP visibility
+- **Quick Refresh** - Right-click the bar icon to instantly update connection status
+- **Smart VPN Detection** - Automatically detects active VPN/proxy interfaces
+- **Latency & Local Details** - Real-time latency monitor and local IP network details
+
 
 ## Usage
 
