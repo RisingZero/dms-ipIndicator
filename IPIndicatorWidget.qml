@@ -134,7 +134,7 @@ PluginComponent {
     }
 
     function _findVpnInterface() {
-        _runSh("check-vpn", "ls /sys/class/net | grep -E '^(tun|tap|wg|ppp)' | head -1", function(output, exitCode) {
+        _runSh("check-vpn", "ls /sys/class/net | grep -E '^(tun|tap|wg|ppp|proton|tailscale|zero|vpn|cscotun)' | head -1", function(output, exitCode) {
             if (exitCode === 0 && output.trim() !== "") {
                 vpnActive = true
                 vpnInterfaceName = output.trim()
