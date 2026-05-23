@@ -64,8 +64,8 @@ PluginSettings {
             settingKey: "refreshInterval"
             label: "Refresh Interval"
             description: "How often to check for IP changes."
-            minimum: 5
-            maximum: 120
+            minimum: 1
+            maximum: 60
             unit: "min"
             defaultValue: 30
         }
