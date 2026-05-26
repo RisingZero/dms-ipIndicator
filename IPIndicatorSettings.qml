@@ -10,91 +10,96 @@ PluginSettings {
     id: root
     pluginId: "ipIndicator"
 
+    LocalI18n {
+        id: localI18n
+        baseUrl: Qt.resolvedUrl(".")
+    }
+
     PluginHeader {
-        title: "IP Indicator Settings"
+        title: localI18n.tr("IP Indicator Settings")
     }
 
     SettingsCard {
-        SectionTitle { text: "Bar Display" }
+        SectionTitle { text: localI18n.tr("Bar Display") }
 
         SelectionSetting {
             settingKey: "displayMode"
-            label: "Display"
-            description: "What to show on the bar."
+            label: localI18n.tr("Display")
+            description: localI18n.tr("What to show on the bar.")
             options: [
-                { label: "Country", value: "country" },
-                { label: "City", value: "city" },
-                { label: "ISP", value: "isp" },
-                { label: "IP Address", value: "ip" },
-                { label: "Country + IP", value: "country_ip" },
-                { label: "Country + City", value: "country_city" },
-                { label: "City + IP", value: "city_ip" },
-                { label: "Icon Only", value: "icon" }
+                { label: localI18n.tr("Country"), value: "country" },
+                { label: localI18n.tr("City"), value: "city" },
+                { label: localI18n.tr("ISP"), value: "isp" },
+                { label: localI18n.tr("IP Address"), value: "ip" },
+                { label: localI18n.tr("Country + IP"), value: "country_ip" },
+                { label: localI18n.tr("Country + City"), value: "country_city" },
+                { label: localI18n.tr("City + IP"), value: "city_ip" },
+                { label: localI18n.tr("Icon Only"), value: "icon" }
             ]
             defaultValue: "country"
         }
 
         ToggleSetting {
             settingKey: "useFlagIcon"
-            label: "Use Country Flag as Icon"
-            description: "Show the country's flag on the bar pill instead of the default globe icon."
+            label: localI18n.tr("Use Country Flag as Icon")
+            description: localI18n.tr("Show the country's flag on the bar pill instead of the default globe icon.")
             defaultValue: true
         }
     }
 
     SettingsCard {
-        SectionTitle { text: "Popout" }
+        SectionTitle { text: localI18n.tr("Popout") }
 
         ToggleSetting {
             settingKey: "showIP"
-            label: "Show Public IP"
+            label: localI18n.tr("Show Public IP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showISP"
-            label: "Show ISP"
+            label: localI18n.tr("Show ISP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocation"
-            label: "Show Location"
+            label: localI18n.tr("Show Location")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalIP"
-            label: "Show Local IP"
+            label: localI18n.tr("Show Local IP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalGateway"
-            label: "Show Local Gateway"
+            label: localI18n.tr("Show Local Gateway")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalInterface"
-            label: "Show Local Interface"
+            label: localI18n.tr("Show Local Interface")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLatency"
-            label: "Show Latency"
+            label: localI18n.tr("Show Latency")
             defaultValue: true
         }
     }
 
     SettingsCard {
-        SectionTitle { text: "Behavior" }
+        SectionTitle { text: localI18n.tr("Behavior") }
 
         SliderSetting {
             settingKey: "refreshInterval"
-            label: "Refresh Interval"
-            description: "How often to check for IP changes."
+            label: localI18n.tr("Refresh Interval")
+            description: localI18n.tr("How often to check for IP changes.")
             minimum: 1
             maximum: 60
             unit: "min"
@@ -103,22 +108,22 @@ PluginSettings {
 
         ToggleSetting {
             settingKey: "notifyOnIPChange"
-            label: "IP / ISP Change Notifications"
-            description: "Show a desktop notification when your public IP address or ISP changes."
+            label: localI18n.tr("IP / ISP Change Notifications")
+            description: localI18n.tr("Show a desktop notification when your public IP address or ISP changes.")
             defaultValue: false
         }
 
         ToggleSetting {
             settingKey: "privacyDefault"
-            label: "Default to Privacy Mode"
-            description: "Start the plugin with public IP details hidden by default."
+            label: localI18n.tr("Default to Privacy Mode")
+            description: localI18n.tr("Start the plugin with public IP details hidden by default.")
             defaultValue: false
         }
 
         ToggleSetting {
             settingKey: "showHints"
-            label: "Show Hints"
-            description: "Display helpful usage tips and shortcuts at the bottom of the popout."
+            label: localI18n.tr("Show Hints")
+            description: localI18n.tr("Display helpful usage tips and shortcuts at the bottom of the popout.")
             defaultValue: true
         }
     }
