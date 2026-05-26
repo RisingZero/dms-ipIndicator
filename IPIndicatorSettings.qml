@@ -40,7 +40,7 @@ PluginSettings {
 
         ToggleSetting {
             settingKey: "showIP"
-            label: "Show IP"
+            label: "Show Public IP"
             defaultValue: true
         }
 
@@ -53,6 +53,30 @@ PluginSettings {
         ToggleSetting {
             settingKey: "showLocation"
             label: "Show Location"
+            defaultValue: true
+        }
+
+        ToggleSetting {
+            settingKey: "showLocalIP"
+            label: "Show Local IP"
+            defaultValue: true
+        }
+
+        ToggleSetting {
+            settingKey: "showLocalGateway"
+            label: "Show Local Gateway"
+            defaultValue: true
+        }
+
+        ToggleSetting {
+            settingKey: "showLocalInterface"
+            label: "Show Local Interface"
+            defaultValue: true
+        }
+
+        ToggleSetting {
+            settingKey: "showLatency"
+            label: "Show Latency"
             defaultValue: true
         }
     }

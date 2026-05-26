@@ -27,6 +27,10 @@ PluginComponent {
     readonly property bool showIP: (pluginData.showIP ?? true)
     readonly property bool showISP: (pluginData.showISP ?? true)
     readonly property bool showLocation: (pluginData.showLocation ?? true)
+    readonly property bool showLocalIP: (pluginData.showLocalIP ?? true)
+    readonly property bool showLocalGateway: (pluginData.showLocalGateway ?? true)
+    readonly property bool showLocalInterface: (pluginData.showLocalInterface ?? true)
+    readonly property bool showLatency: (pluginData.showLatency ?? true)
     readonly property string displayMode: (pluginData.displayMode || "country")
     readonly property bool notifyOnIPChange: (pluginData.notifyOnIPChange ?? false)
     readonly property int refreshIntervalMin: (pluginData.refreshInterval ?? 30)
@@ -587,7 +591,8 @@ PluginComponent {
                     // Group 2: Local Network Card
                     StyledRect {
                         width: parent.width
-                        height: group2Column.implicitHeight + Theme.spacingM * 2
+                        visible: root.showLocalIP || root.showLocalGateway || root.showLocalInterface || root.showLatency
+                        height: visible ? (group2Column.implicitHeight + Theme.spacingM * 2) : 0
                         color: Theme.surfaceContainerHigh
                         radius: Theme.cornerRadius
                         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
@@ -611,6 +616,7 @@ PluginComponent {
                             // Local IP Row
                             Row {
                                 width: parent.width
+                                visible: root.showLocalIP
                                 
                                 StyledText {
                                     text: "Local IP"
@@ -630,6 +636,7 @@ PluginComponent {
                             // Gateway Row
                             Row {
                                 width: parent.width
+                                visible: root.showLocalGateway
                                 
                                 StyledText {
                                     text: "Gateway"
@@ -649,6 +656,7 @@ PluginComponent {
                             // Interface Row
                             Row {
                                 width: parent.width
+                                visible: root.showLocalInterface
                                 
                                 StyledText {
                                     text: "Interface"
@@ -668,6 +676,7 @@ PluginComponent {
                             // Latency Row
                             Row {
                                 width: parent.width
+                                visible: root.showLatency
                                 
                                 StyledText {
                                     text: "Latency"
@@ -736,9 +745,19 @@ PluginComponent {
         }
 
         // Group 2: Local Network Card
-        h += 44; // Card Margins + Title
-        h += 28 * 4; // Local IP, Gateway, Interface, Latency
-        h += 12 * 3; // 3 spacings
+        if (root.showLocalIP || root.showLocalGateway || root.showLocalInterface || root.showLatency) {
+            h += 44; // Card Margins + Title
+            if (root.showLocalIP) h += 28;
+            if (root.showLocalGateway) h += 28;
+            if (root.showLocalInterface) h += 28;
+            if (root.showLatency) h += 28;
+            let rows = 0;
+            if (root.showLocalIP) rows++;
+            if (root.showLocalGateway) rows++;
+            if (root.showLocalInterface) rows++;
+            if (root.showLatency) rows++;
+            if (rows > 1) h += 12 * (rows - 1);
+        }
 
         if (root.showHints) h += 60;
         return h + 40; // margins
