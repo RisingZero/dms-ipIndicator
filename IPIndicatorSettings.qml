@@ -33,6 +33,13 @@ PluginSettings {
             ]
             defaultValue: "country"
         }
+
+        ToggleSetting {
+            settingKey: "useFlagIcon"
+            label: "Use Country Flag as Icon"
+            description: "Show the country's flag on the bar pill instead of the default globe icon."
+            defaultValue: true
+        }
     }
 
     SettingsCard {

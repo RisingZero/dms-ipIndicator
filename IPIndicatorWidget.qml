@@ -31,6 +31,7 @@ PluginComponent {
     readonly property bool showLocalGateway: (pluginData.showLocalGateway ?? true)
     readonly property bool showLocalInterface: (pluginData.showLocalInterface ?? true)
     readonly property bool showLatency: (pluginData.showLatency ?? true)
+    readonly property bool useFlagIcon: (pluginData.useFlagIcon ?? true)
     readonly property string displayMode: (pluginData.displayMode || "country")
     readonly property bool notifyOnIPChange: (pluginData.notifyOnIPChange ?? false)
     readonly property int refreshIntervalMin: (pluginData.refreshInterval ?? 30)
@@ -66,6 +67,7 @@ PluginComponent {
 
     // IP change tracking
     property string lastKnownIP: ""
+    property string lastKnownCountryCode: ""
 
     // Provider list for redundancy (primary uses HTTPS for privacy/security)
     property var ipProviders: [
@@ -98,16 +100,16 @@ PluginComponent {
             }
         },
         {
-            name: "ifconfig.me",
-            url: "https://ifconfig.me/all.json",
+            name: "freeipapi.com",
+            url: "https://freeipapi.com/api/json",
             parser: function(data) {
                 return {
-                    ip: data.ip_addr || "",
-                    isp: "",
-                    countryCode: (data.country_code || "").toLowerCase(),
-                    country: data.country || "",
-                    region: null,
-                    city: data.city || ""
+                    ip: data.ipAddress || "",
+                    isp: data.asnOrganization || "",
+                    countryCode: (data.countryCode || "").toLowerCase(),
+                    country: data.countryName || "",
+                    region: data.regionName || "",
+                    city: data.cityName || ""
                 }
             }
         }
@@ -130,6 +132,26 @@ PluginComponent {
         running: autoRefresh
         repeat: true
         triggeredOnStart: false
+        onTriggered: {
+            checkVPN()
+            fetchLocalDetails()
+            fetchIPInfo()
+        }
+    }
+
+    // Automatically detect network or VPN changes and trigger a fast, responsive refetch
+    Connections {
+        target: NetworkService
+        function onConnectionChanged() {
+            vpnRefreshTimer.restart()
+        }
+    }
+
+    Timer {
+        id: vpnRefreshTimer
+        interval: 1500 // 1.5s delay to allow routing tables to settle
+        running: false
+        repeat: false
         onTriggered: {
             checkVPN()
             fetchLocalDetails()
@@ -210,6 +232,7 @@ PluginComponent {
 
     function fetchIPInfo() {
         lastKnownIP = publicIP
+        lastKnownCountryCode = countryCode
         isFetching = true
         statusMessage = "..."
         tryProvider(0)
@@ -254,8 +277,8 @@ PluginComponent {
                             reason = "Network connection changed (IP details hidden in Privacy Mode)"
                         } else {
                             var lines = [
-                                "Old IP: " + lastKnownIP,
-                                "New IP: " + publicIP
+                                "Old IP: " + lastKnownIP + (lastKnownCountryCode ? " " + root.getFlagEmoji(lastKnownCountryCode) : ""),
+                                "New IP: " + publicIP + (countryCode ? " " + root.getFlagEmoji(countryCode) : "")
                             ]
                             if (ispName) {
                                 lines.push("ISP: " + ispName)
@@ -273,6 +296,7 @@ PluginComponent {
                     }
 
                     lastKnownIP = publicIP
+                    lastKnownCountryCode = countryCode
 
                     isFetching = false
                     statusMessage = "OK"
@@ -309,6 +333,16 @@ PluginComponent {
         return root.statusMessage
     }
 
+    function getFlagEmoji(code) {
+        if (!code || code.length !== 2) return "";
+        let codePoints = [];
+        let upper = code.toUpperCase();
+        for (let i = 0; i < upper.length; i++) {
+            codePoints.push(127397 + upper.charCodeAt(i));
+        }
+        return String.fromCodePoint.apply(null, codePoints);
+    }
+
     readonly property color pillColor: {
         if (isFetching) return Theme.surfaceText
         if (privacyMode) return Theme.warning
@@ -327,11 +361,24 @@ PluginComponent {
         Row {
             spacing: Theme.spacingS
 
+            Image {
+                source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
+                width: 20
+                height: 14
+                fillMode: Image.PreserveAspectFit
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                smooth: true
+                asynchronous: true
+                cache: true
+            }
+
             DankIcon {
                 name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
                 size: Theme.iconSizeSmall
                 color: root.pillColor
                 anchors.verticalCenter: parent.verticalCenter
+                visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
             }
 
             StyledText {
@@ -348,11 +395,24 @@ PluginComponent {
         Column {
             spacing: Theme.spacingXS
 
+            Image {
+                source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
+                width: 20
+                height: 14
+                fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                smooth: true
+                asynchronous: true
+                cache: true
+            }
+
             DankIcon {
                 name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
                 size: Theme.iconSizeSmall
                 color: root.pillColor
                 anchors.horizontalCenter: parent.horizontalCenter
+                visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
             }
 
             StyledText {
