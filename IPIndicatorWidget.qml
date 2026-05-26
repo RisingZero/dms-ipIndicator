@@ -493,6 +493,8 @@ PluginComponent {
                                         font.pixelSize: Theme.fontSizeMedium
                                         color: Theme.surfaceText
                                         font.bold: true
+                                        width: Math.min(implicitWidth, parent.parent.width - 100 - 24 - Theme.spacingS)
+                                        elide: Text.ElideRight
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
 
@@ -613,6 +615,8 @@ PluginComponent {
                                     text: localIP || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -630,6 +634,8 @@ PluginComponent {
                                     text: localGateway || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -647,6 +653,8 @@ PluginComponent {
                                     text: localInterface || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -687,7 +695,23 @@ PluginComponent {
         }
     }
 
-    popoutWidth: 330
+    popoutWidth: {
+        let baseWidth = 330;
+        let longestIP = 15;
+        if (!privacyMode && publicIP && publicIP.length > longestIP) {
+            longestIP = publicIP.length;
+        }
+        if (localIP && localIP.length > longestIP) {
+            longestIP = localIP.length;
+        }
+        if (localGateway && localGateway.length > longestIP) {
+            longestIP = localGateway.length;
+        }
+        if (longestIP > 15) {
+            return baseWidth + (longestIP - 15) * 8;
+        }
+        return baseWidth;
+    }
     popoutHeight: {
         let h = 80; // Header + spacing
         
