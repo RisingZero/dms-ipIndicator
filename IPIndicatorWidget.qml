@@ -158,7 +158,7 @@ PluginComponent {
     }
 
     function _fetchLocalIP() {
-        _runSh("local-ip-addr", "hostname -I | awk '{print $1}'", function(output, exitCode) {
+        _runSh("local-ip-addr", "ip route get 1.1.1.1 2>/dev/null | awk '/src/ {for(i=1;i<=NF;i++) if($i==\"src\") {print $(i+1); exit}}' || hostname -I 2>/dev/null | awk '{print $1}' || ip address | awk '/inet / && !/127.0.0.1/ {split($2, a, \"/\"); print a[1]; exit}'", function(output, exitCode) {
             localIP = (exitCode === 0 && output.trim() !== "") ? output.trim() : "N/A"
         })
     }
