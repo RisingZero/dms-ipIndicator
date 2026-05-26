@@ -53,6 +53,13 @@ PluginComponent {
     property string localGateway: ""
     property string localInterface: ""
 
+    // Shell script to fetch local IP address with multiple robust fallback layers
+    readonly property string _localIPScript: [
+        "ip route get 1.1.1.1 2>/dev/null | awk '/src/ {for(i=1;i<=NF;i++) if($i==\"src\") {print $(i+1); exit}}'",
+        "hostname -I 2>/dev/null | awk '{print $1}'",
+        "ip address | awk '/inet / && !/127.0.0.1/ {split($2, a, \"/\"); print a[1]; exit}'"
+    ].join(" || ")
+
     // IP change tracking
     property string lastKnownIP: ""
 
@@ -158,7 +165,7 @@ PluginComponent {
     }
 
     function _fetchLocalIP() {
-        _runSh("local-ip-addr", "hostname -I | awk '{print $1}'", function(output, exitCode) {
+        _runSh("local-ip-addr", root._localIPScript, function(output, exitCode) {
             localIP = (exitCode === 0 && output.trim() !== "") ? output.trim() : "N/A"
         })
     }
@@ -493,6 +500,8 @@ PluginComponent {
                                         font.pixelSize: Theme.fontSizeMedium
                                         color: Theme.surfaceText
                                         font.bold: true
+                                        width: Math.min(implicitWidth, parent.parent.width - 100 - 24 - Theme.spacingS)
+                                        elide: Text.ElideRight
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
 
@@ -613,6 +622,8 @@ PluginComponent {
                                     text: localIP || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -630,6 +641,8 @@ PluginComponent {
                                     text: localGateway || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -647,6 +660,8 @@ PluginComponent {
                                     text: localInterface || "N/A"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceText
+                                    width: parent.width - 100
+                                    elide: Text.ElideRight
                                 }
                             }
 
@@ -687,7 +702,23 @@ PluginComponent {
         }
     }
 
-    popoutWidth: 330
+    popoutWidth: {
+        let baseWidth = 330;
+        let longestIP = 15;
+        if (!privacyMode && publicIP && publicIP.length > longestIP) {
+            longestIP = publicIP.length;
+        }
+        if (localIP && localIP.length > longestIP) {
+            longestIP = localIP.length;
+        }
+        if (localGateway && localGateway.length > longestIP) {
+            longestIP = localGateway.length;
+        }
+        if (longestIP > 15) {
+            return baseWidth + (longestIP - 15) * 8;
+        }
+        return baseWidth;
+    }
     popoutHeight: {
         let h = 80; // Header + spacing
         
