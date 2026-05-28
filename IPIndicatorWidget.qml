@@ -72,16 +72,16 @@ PluginComponent {
     // Provider list for redundancy (primary uses HTTPS for privacy/security)
     property var ipProviders: [
         {
-            name: "ip-api.com",
-            url: "http://ip-api.com/json",
+            name: "freeipapi.com",
+            url: "https://freeipapi.com/api/json",
             parser: function(data) {
                 return {
-                    ip: data.query || "",
-                    isp: data.isp || data.org || "",
+                    ip: data.ipAddress || "",
+                    isp: data.asnOrganization || "",
                     countryCode: (data.countryCode || "").toLowerCase(),
-                    country: data.country || "",
-                    region: data.regionName || data.region || "",
-                    city: data.city || ""
+                    country: data.countryName || "",
+                    region: data.regionName || "",
+                    city: data.cityName || ""
                 }
             }
         },
@@ -100,16 +100,16 @@ PluginComponent {
             }
         },
         {
-            name: "freeipapi.com",
-            url: "https://freeipapi.com/api/json",
+            name: "ip-api.com",
+            url: "http://ip-api.com/json",
             parser: function(data) {
                 return {
-                    ip: data.ipAddress || "",
-                    isp: data.asnOrganization || "",
+                    ip: data.query || "",
+                    isp: data.isp || data.org || "",
                     countryCode: (data.countryCode || "").toLowerCase(),
-                    country: data.countryName || "",
-                    region: data.regionName || "",
-                    city: data.cityName || ""
+                    country: data.country || "",
+                    region: data.regionName || data.region || "",
+                    city: data.city || ""
                 }
             }
         }
