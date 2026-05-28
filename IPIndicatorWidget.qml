@@ -265,7 +265,7 @@ PluginComponent {
                     publicIP = parsed.ip || ""
                     ispName = parsed.isp || ""
                     countryCode = parsed.countryCode || ""
-                    if (parsed.country) countryName = parsed.country
+                    countryName = parsed.country || ""
                     regionName = parsed.region || ""
                     cityName = parsed.city || ""
 
@@ -321,10 +321,10 @@ PluginComponent {
             switch (root.displayMode) {
                 case "ip": return root.publicIP;
                 case "country_ip": return (countryCode ? countryCode.toUpperCase() + " " : "") + root.publicIP;
-                case "city": return cityName || countryCode.toUpperCase();
+                case "city": return (cityName || regionName || countryCode.toUpperCase());
                 case "isp": return ispName || "N/A";
-                case "country_city": return (countryCode ? countryCode.toUpperCase() : "") + (cityName ? " - " + cityName : "");
-                case "city_ip": return (cityName ? cityName + " " : "") + root.publicIP;
+                case "country_city": return (countryCode ? countryCode.toUpperCase() : "") + (cityName || regionName ? " - " + (cityName || regionName) : "");
+                case "city_ip": return (cityName || regionName ? (cityName || regionName) + " " : "") + root.publicIP;
                 case "country":
                 default:
                     return countryCode ? countryCode.toUpperCase() : root.publicIP;
