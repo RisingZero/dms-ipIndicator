@@ -11,11 +11,6 @@ import "../dms-common"
 PluginComponent {
     id: root
 
-    LocalI18n {
-        id: localI18n
-        baseUrl: Qt.resolvedUrl(".")
-    }
-
     // Public IP state
     property string publicIP: ""
     property string ispName: ""
@@ -127,7 +122,7 @@ PluginComponent {
             statusMessage = "..."
             fetchIPInfo()
         } else {
-            statusMessage = localI18n.tr("Click to fetch")
+            statusMessage = "Click to fetch"
         }
     }
 
@@ -246,7 +241,7 @@ PluginComponent {
     function tryProvider(index) {
         if (index >= ipProviders.length) {
             isFetching = false
-            statusMessage = localI18n.tr("Error")
+            statusMessage = "Error"
             return
         }
         var provider = ipProviders[index]
@@ -279,21 +274,21 @@ PluginComponent {
                     if (notifyOnIPChange && ipChanged) {
                         var reason = ""
                         if (privacyMode) {
-                            reason = localI18n.tr("Network connection changed") + " (" + localI18n.tr("IP details hidden in Privacy Mode") + ")"
+                            reason = "Network connection changed (IP details hidden in Privacy Mode)"
                         } else {
                             var lines = [
-                                localI18n.tr("Old IP") + ": " + lastKnownIP + (lastKnownCountryCode ? " " + root.getFlagEmoji(lastKnownCountryCode) : ""),
-                                localI18n.tr("New IP") + ": " + publicIP + (countryCode ? " " + root.getFlagEmoji(countryCode) : "")
+                                "Old IP: " + lastKnownIP + (lastKnownCountryCode ? " " + root.getFlagEmoji(lastKnownCountryCode) : ""),
+                                "New IP: " + publicIP + (countryCode ? " " + root.getFlagEmoji(countryCode) : "")
                             ]
                             if (ispName) {
-                                lines.push(localI18n.tr("ISP") + ": " + ispName)
+                                lines.push("ISP: " + ispName)
                             }
                             var locs = []
                             if (cityName) locs.push(cityName)
                             if (regionName) locs.push(regionName)
                             if (countryName) locs.push(countryName)
                             if (locs.length > 0) {
-                                lines.push(localI18n.tr("Location") + ": " + locs.join(", "))
+                                lines.push("Location: " + locs.join(", "))
                             }
                             reason = lines.join("\n")
                         }
@@ -540,7 +535,7 @@ PluginComponent {
                             spacing: Theme.spacingM
 
                             StyledText {
-                                text: localI18n.tr("Public Connection")
+                                text: "Public Connection"
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.bold: true
                                 color: Theme.primary
@@ -552,7 +547,7 @@ PluginComponent {
                                 visible: root.showIP
                                 
                                 StyledText {
-                                    text: localI18n.tr("Public IP")
+                                    text: "Public IP"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -595,7 +590,7 @@ PluginComponent {
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
                                                 Proc.runCommand("copy-ip", ["wl-copy", "--", publicIP], function() {
-                                                    ToastService?.showInfo(localI18n.tr("Copied to clipboard"))
+                                                    ToastService?.showInfo("Copied to clipboard")
                                                 })
                                             }
                                         }
@@ -617,7 +612,7 @@ PluginComponent {
                                 visible: root.showISP
                                 
                                 StyledText {
-                                    text: localI18n.tr("ISP")
+                                    text: "ISP"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -637,7 +632,7 @@ PluginComponent {
                                 visible: root.showLocation
                                 
                                 StyledText {
-                                    text: localI18n.tr("Location")
+                                    text: "Location"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -672,7 +667,7 @@ PluginComponent {
                             spacing: Theme.spacingM
 
                             StyledText {
-                                text: localI18n.tr("Local Network")
+                                text: "Local Network"
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.bold: true
                                 color: Theme.primary
@@ -684,7 +679,7 @@ PluginComponent {
                                 visible: root.showLocalIP
                                 
                                 StyledText {
-                                    text: localI18n.tr("Local IP")
+                                    text: "Local IP"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -704,7 +699,7 @@ PluginComponent {
                                 visible: root.showLocalGateway
                                 
                                 StyledText {
-                                    text: localI18n.tr("Gateway")
+                                    text: "Gateway"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -724,7 +719,7 @@ PluginComponent {
                                 visible: root.showLocalInterface
                                 
                                 StyledText {
-                                    text: localI18n.tr("Interface")
+                                    text: "Interface"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -744,7 +739,7 @@ PluginComponent {
                                 visible: root.showLatency
                                 
                                 StyledText {
-                                    text: localI18n.tr("Latency")
+                                    text: "Latency"
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -764,11 +759,11 @@ PluginComponent {
 
                         HintItem {
                             icon: "mouse"
-                            text: localI18n.tr("Right-click the bar icon to quickly refresh network status")
+                            text: "Right-click the bar icon to quickly refresh network status"
                         }
                         HintItem {
                             icon: "visibility_off"
-                            text: localI18n.tr("Use the eye button in header to toggle Privacy Mode")
+                            text: "Use the eye button in header to toggle Privacy Mode"
                         }
                     }
                 }
