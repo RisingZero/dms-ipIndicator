@@ -93,7 +93,7 @@ PluginComponent {
                     ip: data.ip || "",
                     isp: data.org || "",
                     countryCode: (data.country || "").toLowerCase(),
-                    country: null,
+                    country: data.country || "",
                     region: data.region || "",
                     city: data.city || ""
                 }
@@ -247,7 +247,7 @@ PluginComponent {
         var provider = ipProviders[index]
         Proc.runCommand(
             "fetch-ip-" + index,
-            ["curl", "-s", provider.url],
+            ["curl", "-sL", provider.url],
             function(output, exitCode) {
                 if (exitCode !== 0 || !output) {
                     tryProvider(index + 1)
