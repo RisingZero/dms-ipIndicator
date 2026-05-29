@@ -25,7 +25,8 @@ PluginComponent {
     property bool privacyMode: (pluginData.privacyDefault || false)
     property bool autoRefresh: (pluginData.autoRefresh ?? true)
     readonly property bool showHints: (pluginData.showHints ?? true)
-    readonly property bool showIP: (pluginData.showIP ?? true)
+    readonly property bool showIPv4: (pluginData.showIPv4 ?? true)
+    readonly property bool showIPv6: (pluginData.showIPv6 ?? true)
     readonly property bool showISP: (pluginData.showISP ?? true)
     readonly property bool showLocation: (pluginData.showLocation ?? true)
     readonly property bool showLocalIP: (pluginData.showLocalIP ?? true)
@@ -371,9 +372,12 @@ PluginComponent {
     popoutHeight: {
         let h = 80; // Header + spacing
         // Group 1: Public Connection Card
-        if (root.showIP || root.showISP || root.showLocation) {
+        if (root.showIPv4 || root.showIPv6 || root.showISP || root.showLocation) {
             h += 44; // Card Margins + Title
-            if (root.showIP)
+            if (root.showIPv4)
+                h += 28;
+
+            if (root.showIPv6)
                 h += 28;
 
             if (root.showISP)
@@ -383,7 +387,10 @@ PluginComponent {
                 h += 28;
 
             let rows = 0;
-            if (root.showIP)
+            if (root.showIPv4)
+                rows++;
+
+            if (root.showIPv6)
                 rows++;
 
             if (root.showISP)
@@ -584,7 +591,7 @@ PluginComponent {
                         radius: Theme.cornerRadius
                         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
                         border.width: 1
-                        visible: root.showIP || root.showISP || root.showLocation
+                        visible: root.showIPv4 || root.showIPv6 || root.showISP || root.showLocation
 
                         Column {
                             id: group1Column
@@ -605,7 +612,7 @@ PluginComponent {
                             // IPv4 Row
                             Row {
                                 width: parent.width
-                                visible: root.showIP
+                                visible: root.showIPv4
 
                                 StyledText {
                                     text: I18n.tr("IPv4")
@@ -676,7 +683,7 @@ PluginComponent {
                             // IPv6 Row
                             Row {
                                 width: parent.width
-                                visible: root.showIP
+                                visible: root.showIPv6
 
                                 StyledText {
                                     text: I18n.tr("IPv6")

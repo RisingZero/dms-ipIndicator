@@ -1,32 +1,51 @@
+import "./dms-common"
 import QtQuick
 import QtQuick.Controls
 import qs.Common
+import qs.Modules.Plugins
 import qs.Services
 import qs.Widgets
-import qs.Modules.Plugins
-import "./dms-common"
 
 PluginSettings {
     id: root
+
     pluginId: "ipIndicator"
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Bar Display"); icon: "view_day" }
+        SectionTitle {
+            text: I18n.tr("Bar Display")
+            icon: "view_day"
+        }
 
         SelectionSetting {
             settingKey: "displayMode"
             label: I18n.tr("Display")
             description: I18n.tr("What to show on the bar.")
-            options: [
-                { label: I18n.tr("Country"), value: "country" },
-                { label: I18n.tr("City"), value: "city" },
-                { label: I18n.tr("ISP"), value: "isp" },
-                { label: I18n.tr("IP Address"), value: "ip" },
-                { label: I18n.tr("Country + IP"), value: "country_ip" },
-                { label: I18n.tr("Country + City"), value: "country_city" },
-                { label: I18n.tr("City + IP"), value: "city_ip" },
-                { label: I18n.tr("Icon Only"), value: "icon" }
-            ]
+            options: [{
+                "label": I18n.tr("Country"),
+                "value": "country"
+            }, {
+                "label": I18n.tr("City"),
+                "value": "city"
+            }, {
+                "label": I18n.tr("ISP"),
+                "value": "isp"
+            }, {
+                "label": I18n.tr("IP Address"),
+                "value": "ip"
+            }, {
+                "label": I18n.tr("Country + IP"),
+                "value": "country_ip"
+            }, {
+                "label": I18n.tr("Country + City"),
+                "value": "country_city"
+            }, {
+                "label": I18n.tr("City + IP"),
+                "value": "city_ip"
+            }, {
+                "label": I18n.tr("Icon Only"),
+                "value": "icon"
+            }]
             defaultValue: "country"
         }
 
@@ -36,14 +55,24 @@ PluginSettings {
             description: I18n.tr("Show the country's flag on the bar pill instead of the default globe icon.")
             defaultValue: true
         }
+
     }
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Popout"); icon: "call_made" }
+        SectionTitle {
+            text: I18n.tr("Popout")
+            icon: "call_made"
+        }
 
         ToggleSetting {
-            settingKey: "showIP"
-            label: I18n.tr("Show Public IP")
+            settingKey: "showIPv4"
+            label: I18n.tr("Show IPv4")
+            defaultValue: true
+        }
+
+        ToggleSetting {
+            settingKey: "showIPv6"
+            label: I18n.tr("Show IPv6")
             defaultValue: true
         }
 
@@ -82,10 +111,14 @@ PluginSettings {
             label: I18n.tr("Show Latency")
             defaultValue: true
         }
+
     }
 
     SettingsCard {
-        SectionTitle { text: I18n.tr("Behavior"); icon: "settings" }
+        SectionTitle {
+            text: I18n.tr("Behavior")
+            icon: "settings"
+        }
 
         SliderSetting {
             settingKey: "refreshInterval"
@@ -117,6 +150,7 @@ PluginSettings {
             description: I18n.tr("Display helpful usage tips and shortcuts at the bottom of the popout.")
             defaultValue: true
         }
+
     }
 
     PluginAbout {
