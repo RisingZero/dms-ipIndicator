@@ -253,7 +253,7 @@ PluginComponent {
         var ipv4Data = null;
         var ipv6Data = null;
         // Fetch IPv4
-        Proc.runCommand("fetch-ip-v4-" + index, ["curl", "-4", "-sL", "--connect-timeout", "5", provider.url], function(output, exitCode) {
+        Proc.runCommand("fetch-ip-v4-" + index, ["curl", "-4", "-sL", "--connect-timeout", "3", provider.url], function(output, exitCode) {
             ipv4Done = true;
             if (exitCode === 0 && output) {
                 try {
@@ -266,9 +266,9 @@ PluginComponent {
                 }
             }
             checkComplete();
-        }, 50, 8000);
+        }, 50, 4000);
         // Fetch IPv6
-        Proc.runCommand("fetch-ip-v6-" + index, ["curl", "-6", "-sL", "--connect-timeout", "5", provider.url], function(output, exitCode) {
+        Proc.runCommand("fetch-ip-v6-" + index, ["curl", "-6", "-sL", "--connect-timeout", "3", provider.url], function(output, exitCode) {
             ipv6Done = true;
             if (exitCode === 0 && output) {
                 try {
@@ -281,7 +281,7 @@ PluginComponent {
                 }
             }
             checkComplete();
-        }, 50, 8000);
+        }, 50, 4000);
     }
 
     function togglePrivacy() {
@@ -355,9 +355,14 @@ PluginComponent {
     popoutWidth: {
         let baseWidth = 330;
         let longestIP = 15;
-        if (!privacyMode && publicIP && publicIP.length > longestIP)
-            longestIP = publicIP.length;
+        if (!privacyMode) {
+            if (publicIPv4 && publicIPv4.length > longestIP)
+                longestIP = publicIPv4.length;
 
+            if (publicIPv6 && publicIPv6.length > longestIP)
+                longestIP = publicIPv6.length;
+
+        }
         if (localIP && localIP.length > longestIP)
             longestIP = localIP.length;
 
