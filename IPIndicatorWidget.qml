@@ -6,7 +6,7 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
-import "../dms-common"
+import "./dms-common"
 
 PluginComponent {
     id: root
@@ -510,7 +510,7 @@ PluginComponent {
                         visible: vpnActive
                         anchors.horizontalCenter: parent.horizontalCenter
                         StyledText {
-                            text: "VPN: " + vpnInterfaceName
+                            text: I18n.tr("VPN: ") + vpnInterfaceName
                             color: Theme.success
                             font.pixelSize: Theme.fontSizeMedium
                         }
@@ -535,7 +535,7 @@ PluginComponent {
                             spacing: Theme.spacingM
 
                             StyledText {
-                                text: "Public Connection"
+                                text: I18n.tr("Public Connection")
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.bold: true
                                 color: Theme.primary
@@ -547,7 +547,7 @@ PluginComponent {
                                 visible: root.showIP
                                 
                                 StyledText {
-                                    text: "Public IP"
+                                    text: I18n.tr("Public IP")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -612,7 +612,7 @@ PluginComponent {
                                 visible: root.showISP
                                 
                                 StyledText {
-                                    text: "ISP"
+                                    text: I18n.tr("ISP")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -632,7 +632,7 @@ PluginComponent {
                                 visible: root.showLocation
                                 
                                 StyledText {
-                                    text: "Location"
+                                    text: I18n.tr("Location")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -667,7 +667,7 @@ PluginComponent {
                             spacing: Theme.spacingM
 
                             StyledText {
-                                text: "Local Network"
+                                text: I18n.tr("Local Network")
                                 font.pixelSize: Theme.fontSizeSmall
                                 font.bold: true
                                 color: Theme.primary
@@ -679,7 +679,7 @@ PluginComponent {
                                 visible: root.showLocalIP
                                 
                                 StyledText {
-                                    text: "Local IP"
+                                    text: I18n.tr("Local IP")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -699,7 +699,7 @@ PluginComponent {
                                 visible: root.showLocalGateway
                                 
                                 StyledText {
-                                    text: "Gateway"
+                                    text: I18n.tr("Gateway")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -719,7 +719,7 @@ PluginComponent {
                                 visible: root.showLocalInterface
                                 
                                 StyledText {
-                                    text: "Interface"
+                                    text: I18n.tr("Interface")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -739,7 +739,7 @@ PluginComponent {
                                 visible: root.showLatency
                                 
                                 StyledText {
-                                    text: "Latency"
+                                    text: I18n.tr("Latency")
                                     font.pixelSize: Theme.fontSizeMedium
                                     color: Theme.surfaceVariantText
                                     width: 100
@@ -759,11 +759,11 @@ PluginComponent {
 
                         HintItem {
                             icon: "mouse"
-                            text: "Right-click the bar icon to quickly refresh network status"
+                            text: I18n.tr("Right-click the bar icon to quickly refresh network status")
                         }
                         HintItem {
                             icon: "visibility_off"
-                            text: "Use the eye button in header to toggle Privacy Mode"
+                            text: I18n.tr("Use the eye button in header to toggle Privacy Mode")
                         }
                     }
                 }

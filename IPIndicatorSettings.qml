@@ -4,122 +4,123 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 import qs.Modules.Plugins
-import "../dms-common"
+import "./dms-common"
 
 PluginSettings {
     id: root
     pluginId: "ipIndicator"
 
-    PluginHeader {
-        title: "IP Indicator Settings"
-    }
-
     SettingsCard {
-        SectionTitle { text: "Bar Display" }
+        SectionTitle { text: I18n.tr("Bar Display"); icon: "view_day" }
 
         SelectionSetting {
             settingKey: "displayMode"
-            label: "Display"
-            description: "What to show on the bar."
+            label: I18n.tr("Display")
+            description: I18n.tr("What to show on the bar.")
             options: [
-                { label: "Country", value: "country" },
-                { label: "City", value: "city" },
-                { label: "ISP", value: "isp" },
-                { label: "IP Address", value: "ip" },
-                { label: "Country + IP", value: "country_ip" },
-                { label: "Country + City", value: "country_city" },
-                { label: "City + IP", value: "city_ip" },
-                { label: "Icon Only", value: "icon" }
+                { label: I18n.tr("Country"), value: "country" },
+                { label: I18n.tr("City"), value: "city" },
+                { label: I18n.tr("ISP"), value: "isp" },
+                { label: I18n.tr("IP Address"), value: "ip" },
+                { label: I18n.tr("Country + IP"), value: "country_ip" },
+                { label: I18n.tr("Country + City"), value: "country_city" },
+                { label: I18n.tr("City + IP"), value: "city_ip" },
+                { label: I18n.tr("Icon Only"), value: "icon" }
             ]
             defaultValue: "country"
         }
 
         ToggleSetting {
             settingKey: "useFlagIcon"
-            label: "Use Country Flag as Icon"
-            description: "Show the country's flag on the bar pill instead of the default globe icon."
+            label: I18n.tr("Use Country Flag as Icon")
+            description: I18n.tr("Show the country's flag on the bar pill instead of the default globe icon.")
             defaultValue: true
         }
     }
 
     SettingsCard {
-        SectionTitle { text: "Popout" }
+        SectionTitle { text: I18n.tr("Popout"); icon: "call_made" }
 
         ToggleSetting {
             settingKey: "showIP"
-            label: "Show Public IP"
+            label: I18n.tr("Show Public IP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showISP"
-            label: "Show ISP"
+            label: I18n.tr("Show ISP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocation"
-            label: "Show Location"
+            label: I18n.tr("Show Location")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalIP"
-            label: "Show Local IP"
+            label: I18n.tr("Show Local IP")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalGateway"
-            label: "Show Local Gateway"
+            label: I18n.tr("Show Local Gateway")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLocalInterface"
-            label: "Show Local Interface"
+            label: I18n.tr("Show Local Interface")
             defaultValue: true
         }
 
         ToggleSetting {
             settingKey: "showLatency"
-            label: "Show Latency"
+            label: I18n.tr("Show Latency")
             defaultValue: true
         }
     }
 
     SettingsCard {
-        SectionTitle { text: "Behavior" }
+        SectionTitle { text: I18n.tr("Behavior"); icon: "settings" }
 
         SliderSetting {
             settingKey: "refreshInterval"
-            label: "Refresh Interval"
-            description: "How often to check for IP changes."
+            label: I18n.tr("Refresh Interval")
+            description: I18n.tr("How often to check for IP changes.")
             minimum: 1
             maximum: 60
-            unit: "min"
+            unit: I18n.tr("min")
             defaultValue: 30
         }
 
         ToggleSetting {
             settingKey: "notifyOnIPChange"
-            label: "IP / ISP Change Notifications"
-            description: "Show a desktop notification when your public IP address or ISP changes."
+            label: I18n.tr("IP / ISP Change Notifications")
+            description: I18n.tr("Show a desktop notification when your public IP address or ISP changes.")
             defaultValue: false
         }
 
         ToggleSetting {
             settingKey: "privacyDefault"
-            label: "Default to Privacy Mode"
-            description: "Start the plugin with public IP details hidden by default."
+            label: I18n.tr("Default to Privacy Mode")
+            description: I18n.tr("Start the plugin with public IP details hidden by default.")
             defaultValue: false
         }
 
         ToggleSetting {
             settingKey: "showHints"
-            label: "Show Hints"
-            description: "Display helpful usage tips and shortcuts at the bottom of the popout."
+            label: I18n.tr("Show Hints")
+            description: I18n.tr("Display helpful usage tips and shortcuts at the bottom of the popout.")
             defaultValue: true
         }
     }
+
+    PluginAbout {
+        repoUrl: "https://github.com/hthienloc/dms-ipIndicator"
+    }
+
 }

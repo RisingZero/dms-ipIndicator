@@ -6,18 +6,12 @@ Display your public IP, ISP, and location.
 
 ## Install
 
-**Required:** This plugin requires [dms-common](https://github.com/hthienloc/dms-common) to be installed.
-
+Use the DMS CLI:
 ```bash
-# 1. Install shared components
-git clone https://github.com/hthienloc/dms-common ~/.config/DankMaterialShell/plugins/dms-common
-
-# 2. Install this plugin
 dms plugins install ipIndicator
 ```
 
 Or manually:
-
 ```bash
 git clone https://github.com/hthienloc/dms-ipIndicator ~/.config/DankMaterialShell/plugins/ipIndicator
 ```
