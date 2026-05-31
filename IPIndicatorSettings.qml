@@ -12,15 +12,21 @@ PluginSettings {
     pluginId: "ipIndicator"
 
     SettingsCard {
-        SectionTitle {
+        id: barDisplaySection
+        SectionTitle { 
             text: I18n.tr("Bar Display")
-            icon: "view_day"
+            icon: "view_day" 
+            showReset: displayMode.isDirty || useFlagIcon.isDirty
+            onResetClicked: {
+                displayMode.resetToDefault();
+                useFlagIcon.resetToDefault();
+            }
         }
 
-        SelectionSetting {
+        SelectionSettingPlus {
+            id: displayMode
             settingKey: "displayMode"
-            label: I18n.tr("Display")
-            description: I18n.tr("What to show on the bar.")
+            label: I18n.tr("Display Content")
             options: [{
                 "label": I18n.tr("Country"),
                 "value": "country"
@@ -49,78 +55,122 @@ PluginSettings {
             defaultValue: "country"
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: useFlagIcon
             settingKey: "useFlagIcon"
             label: I18n.tr("Use Country Flag as Icon")
             description: I18n.tr("Show the country's flag on the bar pill instead of the default globe icon.")
             defaultValue: true
         }
-
     }
 
     SettingsCard {
-        SectionTitle {
-            text: I18n.tr("Popout")
-            icon: "call_made"
+        id: popoutSection
+        SectionTitle { 
+            text: I18n.tr("Popout Content")
+            icon: "call_made" 
+            showReset: showIPv4.isDirty || showIPv6.isDirty || showISP.isDirty || showLocation.isDirty || showLocalIP.isDirty || showLocalGateway.isDirty || showLocalInterface.isDirty || showLatency.isDirty
+            onResetClicked: {
+                showIPv4.resetToDefault();
+                showIPv6.resetToDefault();
+                showISP.resetToDefault();
+                showLocation.resetToDefault();
+                showLocalIP.resetToDefault();
+                showLocalGateway.resetToDefault();
+                showLocalInterface.resetToDefault();
+                showLatency.resetToDefault();
+            }
         }
 
-        ToggleSetting {
+        ToggleSettingPlus {
+            id: showIPv4
             settingKey: "showIPv4"
             label: I18n.tr("Show IPv4")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showIPv6
             settingKey: "showIPv6"
             label: I18n.tr("Show IPv6")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showISP
             settingKey: "showISP"
             label: I18n.tr("Show ISP")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showLocation
             settingKey: "showLocation"
             label: I18n.tr("Show Location")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showLocalIP
             settingKey: "showLocalIP"
             label: I18n.tr("Show Local IP")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showLocalGateway
             settingKey: "showLocalGateway"
             label: I18n.tr("Show Local Gateway")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showLocalInterface
             settingKey: "showLocalInterface"
             label: I18n.tr("Show Local Interface")
             defaultValue: true
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showLatency
             settingKey: "showLatency"
             label: I18n.tr("Show Latency")
             defaultValue: true
         }
-
     }
 
     SettingsCard {
-        SectionTitle {
+        id: behaviorSection
+        SectionTitle { 
             text: I18n.tr("Behavior")
-            icon: "settings"
+            icon: "settings" 
+            showReset: refreshInterval.isDirty || notifyOnIPChange.isDirty || privacyDefault.isDirty || showHints.isDirty
+            onResetClicked: {
+                refreshInterval.resetToDefault();
+                notifyOnIPChange.resetToDefault();
+                privacyDefault.resetToDefault();
+                showHints.resetToDefault();
+            }
         }
 
-        SliderSetting {
+        SliderSettingPlus {
+            id: refreshInterval
             settingKey: "refreshInterval"
             label: I18n.tr("Refresh Interval")
             description: I18n.tr("How often to check for IP changes.")
@@ -128,29 +178,58 @@ PluginSettings {
             maximum: 60
             unit: I18n.tr("min")
             defaultValue: 30
+            leftLabel: "1"
+            rightLabel: "60"
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: notifyOnIPChange
             settingKey: "notifyOnIPChange"
-            label: I18n.tr("IP / ISP Change Notifications")
+            label: I18n.tr("IP Change Notifications")
             description: I18n.tr("Show a desktop notification when your public IP address or ISP changes.")
             defaultValue: false
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: privacyDefault
             settingKey: "privacyDefault"
             label: I18n.tr("Default to Privacy Mode")
             description: I18n.tr("Start the plugin with public IP details hidden by default.")
             defaultValue: false
         }
 
-        ToggleSetting {
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showHints
             settingKey: "showHints"
             label: I18n.tr("Show Hints")
-            description: I18n.tr("Display helpful usage tips and shortcuts at the bottom of the popout.")
             defaultValue: true
         }
+    }
 
+    SettingsCard {
+        SectionTitle { 
+            id: usageTitle
+            text: I18n.tr("Usage Guide")
+            icon: "menu_book" 
+            collapsible: true
+            settingKey: "usageGuideExpanded"
+        }
+
+        UsageGuide {
+            expanded: usageTitle.isExpanded
+            items: [
+                I18n.tr("<b>Left-click</b> the pill to open the IP details popout."),
+                I18n.tr("<b>Right-click</b> the pill to manually force a refresh."),
+                I18n.tr("Click any <b>IP address</b> in the popout to copy it to the clipboard."),
+                I18n.tr("Click the <b>eye icon</b> in the popout to toggle privacy mode.")
+            ]
+        }
     }
 
     PluginAbout {
