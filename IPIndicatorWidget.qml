@@ -186,6 +186,11 @@ PluginComponent {
     }
 
     function tryProvider(index) {
+        var ipv4Done = false;
+        var ipv6Done = false;
+        var ipv4Data = null;
+        var ipv6Data = null;
+
         function checkComplete() {
             if (ipv4Done && ipv6Done) {
                 if (!ipv4Data && !ipv6Data) {
@@ -248,10 +253,6 @@ PluginComponent {
             return ;
         }
         var provider = ipProviders[index];
-        var ipv4Done = false;
-        var ipv6Done = false;
-        var ipv4Data = null;
-        var ipv6Data = null;
         // Fetch IPv4
         Proc.runCommand("fetch-ip-v4-" + index, ["curl", "-4", "-sL", "--connect-timeout", "3", provider.url], function(output, exitCode) {
             ipv4Done = true;
