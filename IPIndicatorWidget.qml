@@ -484,73 +484,109 @@ PluginComponent {
     }
 
     horizontalBarPill: Component {
-        Row {
-            spacing: Theme.spacingS
+        Item {
+            implicitWidth: pillRow.implicitWidth
+            implicitHeight: pillRow.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
 
-            Image {
-                source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
-                width: 20
-                height: 14
-                fillMode: Image.PreserveAspectFit
-                anchors.verticalCenter: parent.verticalCenter
-                visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
-                smooth: true
-                asynchronous: true
-                cache: true
+            Row {
+                id: pillRow
+                spacing: Theme.spacingS
+
+                Image {
+                    source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
+                    width: 20
+                    height: 14
+                    fillMode: Image.PreserveAspectFit
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    smooth: true
+                    asynchronous: true
+                    cache: true
+                }
+
+                DankIcon {
+                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    size: Theme.iconSizeSmall
+                    color: root.pillColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                }
+
+                StyledText {
+                    text: root.getDisplayText()
+                    color: root.pillColor
+                    font.pixelSize: Theme.fontSizeMedium
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
+                }
             }
 
-            DankIcon {
-                name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
-                size: Theme.iconSizeSmall
-                color: root.pillColor
-                anchors.verticalCenter: parent.verticalCenter
-                visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.MiddleButton
+                cursorShape: Qt.PointingHandCursor
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.MiddleButton) {
+                        root.togglePrivacy();
+                    }
+                }
             }
-
-            StyledText {
-                text: root.getDisplayText()
-                color: root.pillColor
-                font.pixelSize: Theme.fontSizeMedium
-                anchors.verticalCenter: parent.verticalCenter
-                visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
-            }
-
         }
 
     }
 
     verticalBarPill: Component {
-        Column {
-            spacing: Theme.spacingXS
+        Item {
+            implicitWidth: pillColumn.implicitWidth
+            implicitHeight: pillColumn.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
 
-            Image {
-                source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
-                width: 20
-                height: 14
-                fillMode: Image.PreserveAspectFit
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
-                smooth: true
-                asynchronous: true
-                cache: true
+            Column {
+                id: pillColumn
+                spacing: Theme.spacingXS
+
+                Image {
+                    source: root.countryCode ? "./flags/" + root.countryCode.toLowerCase() + ".png" : ""
+                    width: 20
+                    height: 14
+                    fillMode: Image.PreserveAspectFit
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    smooth: true
+                    asynchronous: true
+                    cache: true
+                }
+
+                DankIcon {
+                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    size: Theme.iconSizeSmall
+                    color: root.pillColor
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                }
+
+                StyledText {
+                    text: root.getDisplayText()
+                    color: root.pillColor
+                    font.pixelSize: Theme.fontSizeSmall
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
+                }
             }
 
-            DankIcon {
-                name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
-                size: Theme.iconSizeSmall
-                color: root.pillColor
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.MiddleButton
+                cursorShape: Qt.PointingHandCursor
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.MiddleButton) {
+                        root.togglePrivacy();
+                    }
+                }
             }
-
-            StyledText {
-                text: root.getDisplayText()
-                color: root.pillColor
-                font.pixelSize: Theme.fontSizeSmall
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: root.displayMode !== "icon" && root.getDisplayText() !== ""
-            }
-
         }
 
     }
@@ -932,7 +968,7 @@ PluginComponent {
 
                         HintItem {
                             icon: "visibility_off"
-                            text: I18n.tr("Use the eye button in header to toggle Privacy Mode")
+                            text: I18n.tr("Middle-click the bar icon or use the eye button to toggle Privacy Mode")
                         }
 
                     }
