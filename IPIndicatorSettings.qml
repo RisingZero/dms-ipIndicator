@@ -71,7 +71,7 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Popout Content")
             icon: "call_made" 
-            showReset: showIPv4.isDirty || showIPv6.isDirty || showISP.isDirty || showLocation.isDirty || showLocalIP.isDirty || showLocalGateway.isDirty || showLocalInterface.isDirty || showLatency.isDirty
+            showReset: showIPv4.isDirty || showIPv6.isDirty || showISP.isDirty || showLocation.isDirty || showLocalIP.isDirty || showLocalGateway.isDirty || showLocalInterface.isDirty || showLatency.isDirty || showHints.isDirty
             onResetClicked: {
                 showIPv4.resetToDefault();
                 showIPv6.resetToDefault();
@@ -81,6 +81,7 @@ PluginSettings {
                 showLocalGateway.resetToDefault();
                 showLocalInterface.resetToDefault();
                 showLatency.resetToDefault();
+                showHints.resetToDefault();
             }
         }
 
@@ -153,6 +154,15 @@ PluginSettings {
             label: I18n.tr("Show Latency")
             defaultValue: true
         }
+
+        Separator {}
+
+        ToggleSettingPlus {
+            id: showHints
+            settingKey: "showHints"
+            label: I18n.tr("Show Hints")
+            defaultValue: true
+        }
     }
 
     SettingsCard {
@@ -160,12 +170,11 @@ PluginSettings {
         SectionTitle { 
             text: I18n.tr("Behavior")
             icon: "settings" 
-            showReset: refreshInterval.isDirty || notifyOnIPChange.isDirty || privacyDefault.isDirty || showHints.isDirty
+            showReset: refreshInterval.isDirty || notifyOnIPChange.isDirty || privacyDefault.isDirty
             onResetClicked: {
                 refreshInterval.resetToDefault();
                 notifyOnIPChange.resetToDefault();
                 privacyDefault.resetToDefault();
-                showHints.resetToDefault();
             }
         }
 
@@ -201,15 +210,6 @@ PluginSettings {
             description: I18n.tr("Start the plugin with public IP details hidden by default.")
             defaultValue: false
         }
-
-        Separator {}
-
-        ToggleSettingPlus {
-            id: showHints
-            settingKey: "showHints"
-            label: I18n.tr("Show Hints")
-            defaultValue: true
-        }
     }
 
     SettingsCard {
@@ -226,6 +226,7 @@ PluginSettings {
             items: [
                 I18n.tr("<b>Left-click</b> the pill to open the IP details popout."),
                 I18n.tr("<b>Right-click</b> the pill to manually force a refresh."),
+                I18n.tr("<b>Middle-click</b> the pill to toggle privacy mode."),
                 I18n.tr("Click any <b>IP address</b> in the popout to copy it to the clipboard."),
                 I18n.tr("Click the <b>eye icon</b> in the popout to toggle privacy mode.")
             ]
