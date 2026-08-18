@@ -23,6 +23,7 @@ PluginComponent {
     property string statusMessage: "..."
     // Settings
     property bool privacyMode: (pluginData.privacyDefault || false)
+    property bool pillShowLocal: (pluginData.pillShowLocal || false)
     property bool autoRefresh: (pluginData.autoRefresh ?? true)
     readonly property bool showHints: (pluginData.showHints ?? true)
     readonly property bool showIPv4: (pluginData.showIPv4 ?? true)
@@ -104,6 +105,9 @@ PluginComponent {
 
         if (vpnActive)
             return Theme.success;
+
+        if (pillShowLocal)
+            return (localIP && localIP !== "N/A") ? Theme.primary : Theme.surfaceText;
 
         if (root.publicIP)
             return Theme.primary;
@@ -289,12 +293,23 @@ PluginComponent {
         privacyMode = !privacyMode;
     }
 
+    function setPillSource(showLocal) {
+        if (pillShowLocal === showLocal)
+            return;
+
+        pillShowLocal = showLocal;
+        pluginService.savePluginData("ipIndicator", "pillShowLocal", showLocal);
+    }
+
     function getDisplayText() {
         if (root.displayMode === "icon")
             return "";
 
         if (privacyMode)
             return "";
+
+        if (pillShowLocal)
+            return localIP || "N/A";
 
         if (isFetching)
             return "...";
@@ -377,6 +392,7 @@ PluginComponent {
     }
     popoutHeight: {
         let h = 80; // Header + spacing
+        h += 36 + Theme.spacingM; // Bar Display Source toggle row
         // Group 1: Public Connection Card
         if (root.showIPv4 || root.showIPv6 || root.showISP || root.showLocation) {
             h += 44; // Card Margins + Title
@@ -500,18 +516,18 @@ PluginComponent {
                     height: 14
                     fillMode: Image.PreserveAspectFit
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    visible: root.useFlagIcon && !privacyMode && !pillShowLocal && root.countryCode !== ""
                     smooth: true
                     asynchronous: true
                     cache: true
                 }
 
                 DankIcon {
-                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    name: privacyMode ? "visibility_off" : (pillShowLocal ? "lan" : (vpnActive ? "vpn_key" : "public"))
                     size: Theme.iconSizeSmall
                     color: root.pillColor
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                    visible: !root.useFlagIcon || privacyMode || pillShowLocal || root.countryCode === ""
                 }
 
                 StyledText {
@@ -554,18 +570,18 @@ PluginComponent {
                     height: 14
                     fillMode: Image.PreserveAspectFit
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: root.useFlagIcon && !privacyMode && root.countryCode !== ""
+                    visible: root.useFlagIcon && !privacyMode && !pillShowLocal && root.countryCode !== ""
                     smooth: true
                     asynchronous: true
                     cache: true
                 }
 
                 DankIcon {
-                    name: privacyMode ? "visibility_off" : (vpnActive ? "vpn_key" : "public")
+                    name: privacyMode ? "visibility_off" : (pillShowLocal ? "lan" : (vpnActive ? "vpn_key" : "public"))
                     size: Theme.iconSizeSmall
                     color: root.pillColor
                     anchors.horizontalCenter: parent.horizontalCenter
-                    visible: !root.useFlagIcon || privacyMode || root.countryCode === ""
+                    visible: !root.useFlagIcon || privacyMode || pillShowLocal || root.countryCode === ""
                 }
 
                 StyledText {
@@ -621,6 +637,89 @@ PluginComponent {
                             text: I18n.tr("VPN: ") + vpnInterfaceName
                             color: Theme.success
                             font.pixelSize: Theme.fontSizeMedium
+                        }
+
+                    }
+
+                    // Bar Display Source toggle
+                    Row {
+                        id: pillSourceRow
+                        width: parent.width
+                        height: 36
+                        spacing: 0
+
+                        Rectangle {
+                            width: parent.width / 2
+                            height: parent.height
+                            radius: Theme.cornerRadius
+                            topRightRadius: 0
+                            bottomRightRadius: 0
+                            color: !pillShowLocal ? Theme.primary : Theme.surfaceContainerHigh
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
+
+                                DankIcon {
+                                    name: "public"
+                                    size: Theme.iconSizeSmall
+                                    color: !pillShowLocal ? Theme.primaryText : Theme.surfaceText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                StyledText {
+                                    text: I18n.tr("Public")
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    font.bold: !pillShowLocal
+                                    color: !pillShowLocal ? Theme.primaryText : Theme.surfaceText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.setPillSource(false)
+                            }
+
+                        }
+
+                        Rectangle {
+                            width: parent.width / 2
+                            height: parent.height
+                            radius: Theme.cornerRadius
+                            topLeftRadius: 0
+                            bottomLeftRadius: 0
+                            color: pillShowLocal ? Theme.primary : Theme.surfaceContainerHigh
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
+
+                                DankIcon {
+                                    name: "lan"
+                                    size: Theme.iconSizeSmall
+                                    color: pillShowLocal ? Theme.primaryText : Theme.surfaceText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                StyledText {
+                                    text: I18n.tr("Local")
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    font.bold: pillShowLocal
+                                    color: pillShowLocal ? Theme.primaryText : Theme.surfaceText
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.setPillSource(true)
+                            }
+
                         }
 
                     }
