@@ -392,7 +392,6 @@ PluginComponent {
     }
     popoutHeight: {
         let h = 80; // Header + spacing
-        h += 36 + Theme.spacingM; // Bar Display Source toggle row
         // Group 1: Public Connection Card
         if (root.showIPv4 || root.showIPv6 || root.showISP || root.showLocation) {
             h += 44; // Card Margins + Title
@@ -637,89 +636,6 @@ PluginComponent {
                             text: I18n.tr("VPN: ") + vpnInterfaceName
                             color: Theme.success
                             font.pixelSize: Theme.fontSizeMedium
-                        }
-
-                    }
-
-                    // Bar Display Source toggle
-                    Row {
-                        id: pillSourceRow
-                        width: parent.width
-                        height: 36
-                        spacing: 0
-
-                        Rectangle {
-                            width: parent.width / 2
-                            height: parent.height
-                            radius: Theme.cornerRadius
-                            topRightRadius: 0
-                            bottomRightRadius: 0
-                            color: !pillShowLocal ? Theme.primary : Theme.surfaceContainerHigh
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DankIcon {
-                                    name: "public"
-                                    size: Theme.iconSizeSmall
-                                    color: !pillShowLocal ? Theme.primaryText : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: I18n.tr("Public")
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    font.bold: !pillShowLocal
-                                    color: !pillShowLocal ? Theme.primaryText : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.setPillSource(false)
-                            }
-
-                        }
-
-                        Rectangle {
-                            width: parent.width / 2
-                            height: parent.height
-                            radius: Theme.cornerRadius
-                            topLeftRadius: 0
-                            bottomLeftRadius: 0
-                            color: pillShowLocal ? Theme.primary : Theme.surfaceContainerHigh
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DankIcon {
-                                    name: "lan"
-                                    size: Theme.iconSizeSmall
-                                    color: pillShowLocal ? Theme.primaryText : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: I18n.tr("Local")
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    font.bold: pillShowLocal
-                                    color: pillShowLocal ? Theme.primaryText : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.setPillSource(true)
-                            }
-
                         }
 
                     }
@@ -1101,6 +1017,32 @@ PluginComponent {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: togglePrivacy()
+                            }
+
+                        }
+
+                        // Bar Display Source Button
+                        Rectangle {
+                            width: 32
+                            height: 32
+                            radius: 16
+                            color: sourceArea.containsMouse ? Theme.surfaceContainerHigh : "transparent"
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            DankIcon {
+                                anchors.centerIn: parent
+                                name: pillShowLocal ? "lan" : "public"
+                                size: Theme.iconSizeSmall
+                                color: Theme.surfaceText
+                            }
+
+                            MouseArea {
+                                id: sourceArea
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.setPillSource(!pillShowLocal)
                             }
 
                         }
